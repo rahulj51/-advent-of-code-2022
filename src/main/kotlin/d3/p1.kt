@@ -6,14 +6,14 @@ fun readFile(f: String): List<String> {
     return File(f).readLines()
 }
 
-fun readInputFile(): List<String> {
-    return readFile("src/main/kotlin/d3/input.dat")
+fun readInputFile(fileName: String): List<String> {
+    return readFile(fileName)
 }
 
 val alphabets = ('a'..'z')
 
 fun main() {
-    val l = readInputFile()
+    val l = readInputFile("src/main/kotlin/d3/input.dat")
     val compartments = l.map { listOf(it.take(it.length / 2), it.drop(it.length/2)) }
     val common = compartments.map { it.first().toSet().intersect(it.last().toSet())  }.flatMap { it }
 
