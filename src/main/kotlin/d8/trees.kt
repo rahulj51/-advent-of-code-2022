@@ -4,6 +4,15 @@ typealias FinderFunction<T> = (Int, List<Int>) -> T
 typealias MergeFunction<T> = (T, T) -> T
 typealias Point = Pair<Int, Int>
 
+//takes from list until the first element that meets the condition.
+//returns full list if the condition is not met
+fun<E> List<E>.takeUntilFirst(predicate: (E) -> Boolean): List<E> {
+
+    val indexOfFirst = this.indexOfFirst { predicate.invoke(it) }
+    if (indexOfFirst == -1) return this
+    return this.subList(0, indexOfFirst+1)
+
+}
 
 fun isVisible(loc: Int, row: List<Int>): Boolean {
     val treeHeight = row[loc]
@@ -16,11 +25,8 @@ fun scenicScore(loc:Int, row: List<Int>): Int {
 
     val treeHeight = row[loc]
 
-    //ugly but works. need to see better alternative
-    var beforeVisible = row.subList(0, loc).reversed().indexOfFirst { it >= treeHeight } + 1
-    beforeVisible = if (beforeVisible == 0) row.subList(0, loc).size  else beforeVisible
-    var afterVisible = row.subList(loc+1, row.size).indexOfFirst { it >= treeHeight } + 1
-    afterVisible = if (afterVisible == 0) row.subList(loc+1, row.size).size else afterVisible
+    val beforeVisible = row.subList(0, loc).reversed().takeUntilFirst { it >= treeHeight }.size
+    val afterVisible = row.subList(loc+1, row.size).takeUntilFirst { it >= treeHeight }.size
 
     return beforeVisible * afterVisible
 }
