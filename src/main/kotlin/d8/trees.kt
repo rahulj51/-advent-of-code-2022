@@ -14,6 +14,18 @@ fun<E> List<E>.takeUntilFirst(predicate: (E) -> Boolean): List<E> {
 
 }
 
+//https://jivimberg.io/blog/2018/06/02/implementing-takewhileinclusive-in-kotlin/
+fun<E> List<E>.takeWhileInclusive(predicate: (E) -> Boolean): List<E> {
+
+    var shouldContinue = true
+    return takeWhile {
+        val result = shouldContinue
+        shouldContinue = predicate(it)
+        result
+    }
+}
+
+
 fun isVisible(loc: Int, row: List<Int>): Boolean {
     val treeHeight = row[loc]
 
@@ -25,8 +37,12 @@ fun scenicScore(loc:Int, row: List<Int>): Int {
 
     val treeHeight = row[loc]
 
-    val beforeVisible = row.subList(0, loc).reversed().takeUntilFirst { it >= treeHeight }.size
-    val afterVisible = row.subList(loc+1, row.size).takeUntilFirst { it >= treeHeight }.size
+//    val beforeVisible = row.subList(0, loc).reversed().takeUntilFirst { it >= treeHeight }.size
+//    val afterVisible = row.subList(loc+1, row.size).takeUntilFirst { it >= treeHeight }.size
+
+    //better and cleaner perhaps. takeuntilInclusive is same as takewhileinclusive negated
+    val beforeVisible = row.subList(0, loc).reversed().takeWhileInclusive { it < treeHeight }.size
+    val afterVisible = row.subList(loc+1, row.size).takeWhileInclusive { it < treeHeight }.size
 
     return beforeVisible * afterVisible
 }
