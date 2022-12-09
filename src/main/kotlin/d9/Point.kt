@@ -50,4 +50,8 @@ data class Point(
         return this.adjacentDiagonally().filter { it.isAdjacentTo(p) }.first()
     }
 
+    fun moveLaterallyAdjacentTo(p: Point): Point {
+        return this.adjacentInSameAxis().filter { it.isAdjacentTo(p) }.first()
+    }
+
 }

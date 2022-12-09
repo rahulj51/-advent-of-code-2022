@@ -8,21 +8,20 @@ data class Rope (
         val newHPos = knots.first().moveLaterally(d)
 
         val newRope = knots.drop(1).fold(listOf<Point>(newHPos).toMutableList()) { acc, it ->
-            acc.add(moveTail(d, acc.last(), it))
+            acc.add(moveTail(acc.last(), it))
             acc
         }
 
         return Rope(newRope)
-
     }
 
-    fun moveTail(d:DIRECTION, head:Point, tail:Point): Point {
+    fun moveTail(head:Point, tail:Point): Point {
         var newTail = tail
 
         //t should move to be adjacent if not already adjacent
         if (! tail.isAdjacentTo(head)) {
             //move
-            newTail = if (tail.onSameAxis(head)) tail.moveLaterally(d) else tail.moveDiagonallyAdjacentTo(head)
+            newTail = if (tail.onSameAxis(head)) tail.moveLaterallyAdjacentTo(head) else tail.moveDiagonallyAdjacentTo(head)
         }
 
         return newTail
@@ -55,7 +54,8 @@ fun solveP2(moves: List<String>) {
             acc.addAll(move(it, acc.last())); acc
         }
 
-    print(allSteps.map { it.knots.last() }.toSet().count())
+    println(allSteps.map { it.knots.last() }.toSet().count())
+
 }
 
 
@@ -69,12 +69,12 @@ fun solveP1(moves: List<String>) {
             acc.addAll(move(it, acc.last())); acc
         }
 
-    print(allSteps.map { it.knots.last() }.toSet().count())
+    println(allSteps.map { it.knots.last() }.toSet().count())
 }
 
 fun main() {
     val moves = common.readInputFile("src/main/kotlin/d9/input.dat")
-//    solveP1(moves)
+    solveP1(moves)
     solveP2(moves)
 }
 
