@@ -45,8 +45,9 @@ fun move(mv: String, current: Rope): List<Rope> {
     return allSteps
 }
 
-fun solveP2(moves: List<String>) {
-    val ropeKnots = (1..10).map { Point(0,0) }
+
+fun solve(moves: List<String>, knots:Int = 2) {
+    val ropeKnots = (1..knots).map { Point(0,0) }
     val initialRopePosition = Rope(ropeKnots)
 
     val allSteps = moves
@@ -55,21 +56,15 @@ fun solveP2(moves: List<String>) {
         }
 
     println(allSteps.map { it.knots.last() }.toSet().count())
+}
 
+fun solveP2(moves: List<String>) {
+    solve(moves, 10)
 }
 
 
 fun solveP1(moves: List<String>) {
-    val initialStateH = Point(0,0)
-    val initialStateT = Point(0,0)
-    val initialRopePosition = Rope(listOf(initialStateH, initialStateT))
-
-    val allSteps = moves
-        .fold(listOf(initialRopePosition).toMutableList()){acc, it ->
-            acc.addAll(move(it, acc.last())); acc
-        }
-
-    println(allSteps.map { it.knots.last() }.toSet().count())
+    solve(moves, 2)
 }
 
 fun main() {
