@@ -18,10 +18,8 @@ fun MutableList<Int>.addX(value: Int) : MutableList<Int> {
     return this.noop().addVal(value)
 }
 
-fun main() {
-    val instructions = readInputFile("src/main/kotlin/d10/input.dat")
-
-    val cycles = instructions.fold(listOf(1).toMutableList()){ acc, it ->
+fun registerValues(instructions: List<String>):List<Int> {
+    return instructions.fold(listOf(1).toMutableList()){ acc, it ->
         when{
             it.trim() == "noop" -> acc.noop()
             it.trim().startsWith("addx") -> acc.addX(it.trim().substringAfter(" ").toInt())
@@ -29,8 +27,16 @@ fun main() {
         acc
     }
 
-//    println(cycles)
+}
 
-    val strength = (20..220 step 40).fold(0){ acc, it -> acc + it * cycles[it-1]}
+fun main() {
+    val instructions = readInputFile("src/main/kotlin/d10/input.dat.smol")
+
+    val registerValues = registerValues(instructions)
+
+    println(registerValues)
+
+    // index -1 because we need to take the value "during", not after
+    val strength = (20..220 step 40).fold(0){ acc, it -> acc + it * registerValues[it-1]}
     println(strength)
 }
