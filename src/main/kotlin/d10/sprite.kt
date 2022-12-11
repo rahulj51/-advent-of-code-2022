@@ -11,7 +11,10 @@ fun main() {
     val cycles = (1..240)
     val pixels = cycles.fold(mutableListOf<Char>()) { acc, it ->
 
+        //we do getOrElse so we can get the latest value (in case the cycles go beyond max
         val spritePosition = registerValues.getOrElse(it-1) {registerValues.last()}
+
+        //pixelpos is cycle modulo 40 because it moves to a new line after 40px.
         val pixelPos = (it - 1) % 40
         val pixel = if (overlaps(pixelPos, spritePosition)) '#' else '.'
 
