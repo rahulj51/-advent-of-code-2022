@@ -4,12 +4,15 @@ import common.readInputFileAsString
 import java.lang.IllegalArgumentException
 import java.math.BigInteger
 
+fun Long.toBigInteger() = BigInteger.valueOf(this)
+fun Int.toBigInteger() = BigInteger.valueOf(toLong())
+
 data class Monk(
-    val items: MutableList<Long>,
-    val testFactor: Long,
+    val items: MutableList<BigInteger>,
+    val testFactor: BigInteger,
     val throwsTo: Pair<Int, Int>,
     val operation: ArrayDeque<String>,
-    val comfortFactor: Long = 3L,
+    val comfortFactor: BigInteger = 3.toBigInteger(),
     var inspections: Int = 0
 ) {
 
@@ -19,20 +22,20 @@ data class Monk(
         this.items.clear()
     }
 
-    fun throwTo(item:Long, monks: List<Monk>) {
+    fun throwTo(item:BigInteger, monks: List<Monk>) {
         val newWL = operate(item) / comfortFactor
-        val test = newWL % testFactor == 0L
+        val test = (newWL % testFactor) == 0L.toBigInteger()
 
         val throwTo = if (test) throwsTo.first else throwsTo.second
         monks[throwTo].items.add(newWL)
     }
 
-    fun operate(oldWL : Long): Long {
+    fun operate(oldWL : BigInteger): BigInteger {
 
         val operator = operation.first()
-        val operand  =  when (operation.last()) {
+        val operand: BigInteger  =  when (operation.last()) {
             "old" -> oldWL
-            else -> operation.last().toLong()
+            else -> operation.last().toLong().toBigInteger()
         }
 
         val x = when (operator) {
@@ -41,21 +44,21 @@ data class Monk(
             else -> oldWL //assume this for now to reduce complexity
         }
 
-        if (x < 0) {
+        if (x < 0.toBigInteger()) {
             println("pause here")
         }
         return x
     }
 
     companion object Parser {
-        fun parse(str: String): Monk {
+        fun parse(str: String, comfortFactor: BigInteger=3.toBigInteger()): Monk {
             val lines = str.split("\n".toRegex()).map { it.trim() }.drop(1)
             val items = items(lines[0]).toMutableList()
             val testFactor = testFactor(lines[2])
             val throwsTo = throwsTo(lines.subList(3,5))
             val operation = operation(lines[1])
 
-            return Monk(items, testFactor, throwsTo, operation)
+            return Monk(items, testFactor, throwsTo, operation, comfortFactor)
 
         }
 
@@ -79,38 +82,45 @@ data class Monk(
             return pair
         }
 
-        private fun testFactor(s: String): Long {
-            return s.substringAfter("by").trim().toLong()
+        private fun testFactor(s: String): BigInteger {
+            return s.substringAfter("by").trim().toLong().toBigInteger()
         }
 
-        private fun items(s: String): List<Long> {
-            return s.substringAfter(":").trim().split(",").map { it.trim().toLong() }
+        private fun items(s: String): List<BigInteger> {
+            return s.substringAfter(":").trim().split(",").map { it.trim().toLong().toBigInteger() }
         }
     }
 
 
 }
 
-//just for fun, these are curious monks, not monkeys
-fun main() {
-    val monkNotes = readInputFileAsString("src/main/kotlin/d11/input.dat")
+fun solve1(monkNotes: String) {
     val monks = monkNotes.split("\n\n".toRegex()).map { (Monk).parse(it) }
-    println(monks)
 
     for (i in (1..20)) {
-        println("in round $i")
-        if (i == 16) {
-            println("pause here")
-        }
         monks.forEach { m -> m.turn(monks)}
-        println(monks)
-        println()
     }
-
-
-    println(monks)
-    val inspections = monks.map { it.inspections }
+    val inspections = monks.map { it.inspections }.sortedDescending()
     println(inspections)
-//    println(inspections[0] * inspections[1])
+    println(inspections[0] * inspections[1])
+}
+
+fun solve2(monkNotes: String) {
+    val monks = monkNotes.split("\n\n".toRegex()).map { (Monk).parse(it, 1L.toBigInteger()) }
+
+    for (i in (1..10000)) {
+        println("round $i")
+        monks.forEach { m -> m.turn(monks)}
+    }
+    val inspections = monks.map { it.inspections }.sortedDescending()
+    println(inspections)
+    println(inspections[0] * inspections[1])
+}
+
+//just for fun, these are curious monks, not monkeys
+fun main() {
+    val monkNotes = readInputFileAsString("src/main/kotlin/d11/input.dat.smol")
+//    solve1(monkNotes)
+    solve2(monkNotes)
 
 }
