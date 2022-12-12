@@ -1,65 +1,75 @@
 package d12
 
 import common.readInputFile
-
-typealias Path = List<Point>
+import java.io.File
 
 data class Point(
     val x : Int,
-    val y : Int
-) {
-    fun up(): Point = Point(x, y + 1)
-    fun down(): Point = Point(x, y - 1)
-    fun right(): Point = Point(x + 1, y)
-    fun left(): Point = Point(x - 1, y)
+    val y : Int,
+    val e : Char
+)
+fun Point.isValid(other: Point) = this.e + 1 >= other.e
+
+sealed class Direction(val x: Int, val y: Int) {
+    object Up : Direction(0, -1)
+    object Down : Direction(0, 1)
+    object Left : Direction(-1, 0)
+    object Right : Direction(1, 0)
 }
 
+val directions = listOf(Direction.Up, Direction.Down, Direction.Left, Direction.Right)
 
 data class Grid(
-    val map: List<List<Char>>,
+    val map: List<List<Point>>,
     val start: Point,
     val end: Point
 ) {
 
-    fun initPath(): Path = listOf(start)
-
-    fun elevationAt(p: Point): Char {
-        //note that y denotes the row since we store each row as a list
-        return map[p.y][p.x]
-    }
-
-    fun walk(paths: List<Path>): List<Path> {
-
-        if (paths.any { it.contains(end) }) {
-            //we have traversed everything
-            return paths
-        } else {
-            val paths1 = paths.flatMap { next(it) }
-//            println(paths1)
-            return walk(paths1)
+    fun Map<Point, Point>.regeneratePath(tail: Point): List<Point> {
+        return when (val next = this[tail]) {
+            null -> return listOf<Point>() + tail
+            else -> regeneratePath(next) + tail
         }
     }
+    
+    fun bfs() : List<Point> {
 
-    fun next(path: List<Point>): List<Path> {
-        val weAreAt = path.last()
-        val possibleNexts = possibleNexts(weAreAt)
+        val rows = map.count()
+        val cols = map.first().count()
 
-        val pN = possibleNexts
-            .filter { ! path.contains(it) } //also exclude a point that's already visited
-            .map { path + it }
-        return pN
+        val path = mutableMapOf<Point, Point>()
+        val queue = mutableListOf<Point>()
+        val visited = mutableMapOf<Point, Boolean>()
+        queue.add(start)
+        visited[start] = true
+
+        while (queue.isNotEmpty()) {
+            val at = queue.removeLast()
+
+            //have we reached the end
+            if (at == end) break
+
+            directions.mapNotNull { direction ->
+                val newX = at.x + direction.x
+                val newY = at.y + direction.y
+                when {
+                    newX < 0 || newY < 0 -> null
+                    newY >= rows || newX >= cols -> null
+                    else -> map[newY][newX]
+                }
+            }.filter { !visited.getOrDefault(it, false) }
+                .filter { at.isValid(it)}
+                .forEach { it ->
+                    queue.add(0, it)
+                    path[it] = at
+                    visited[it] = true
+                }
+        }
+
+        return path.regeneratePath(end)
     }
 
-    private fun possibleNexts(at: Point): Set<Point> {
 
-        val allNexts = setOf<Point>(at.up(), at.down(), at.left(), at.right()).filter { withinBounds(it) }
-        return allNexts.filter { p -> (elevationAt(p) - elevationAt(at) <= 1) }.toSet()
-    }
-
-    private fun withinBounds(p:Point): Boolean {
-        return p.x >= 0 && p.x <= map.first().size - 1  //x axis is within bounds
-                && p.y >=0 && p.y <= map.size -1 //y axis is within bounds
-    }
 
     companion object {
         fun of(lines: List<String>): Grid {
@@ -79,17 +89,45 @@ data class Grid(
                 }
             }
 
-            return Grid(mapWithoutMarkers, Point(startX, startY), Point(endX, endY))
+            val points = mapWithoutMarkers.mapIndexed { j, it -> it.mapIndexed {i, c ->  Point(i,j,c) } }
+
+            return Grid(points, Point(startX, startY, 'a'), Point(endX, endY, 'z'))
+        }
+
+        fun parseInput(input: () -> List<String>): Grid {
+
+            val map = input().map { it.toCharArray().toList() }
+            val startY = map.indexOfFirst { it.contains('S') }
+            val startX = map[startY].indexOf('S')
+            val endY = map.indexOfFirst { it.contains('E') }
+            val endX = map[endY].indexOf('E')
+
+
+            val x = input().mapIndexed { y, row ->
+                row.mapIndexed { x, char ->
+                    when (char) {
+                        'S' -> Point(x = x, y = y, 'a')
+                        'E' -> Point(x = x, y = y, e = 'z')
+                        else -> Point(x = x, y = y, e = char)
+                    }
+                }
+            }
+
+            return Grid(x, Point(startX, startY, 'a'), Point(endX, endY, 'z'))
         }
     }
 
 }
 
 fun main() {
-    val lines = readInputFile("src/main/kotlin/d12/input.dat")
-//    println(lines)
-    val g = Grid.of(lines)
-//    println(g)
-    println(g.walk(listOf(g.initPath())).map { it.size }.sorted().first() - 1)
+//    val lines = readInputFile("src/main/kotlin/d12/input.dat.smol")
+    val input = File("src/main/kotlin/d12/input.dat").readLines()
+    val g = Grid.parseInput { input }
+    println(g.bfs().count() - 1)
+
+    //part2
+    println(g.map.flatMap { it.filter { node -> node.e == 'a' } }
+        .map { g.copy(start = it).bfs().count() - 1 }
+        .filter { it != 0 }.minOf { it })
 
 }
