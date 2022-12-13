@@ -12,6 +12,7 @@ fun main() {
 //    println(compare(pairs[1]))
     println(pairs.map { compare(it) })
     println(pairs.map { compare(it) }.mapIndexed { index, b -> if(b!!) index+1 else 0 })
+    println(pairs.map { compare(it) }.mapIndexed { index, b -> if(b!!) index+1 else 0 }.sum())
 
 }
 
@@ -27,7 +28,10 @@ fun compareVal(left: Any?, right: Any?): Boolean? {
     return when {
         left is Int && right is Int -> if (left == right) null else left < right
         left is List<*> && right is List<*> ->
-            if (left.size == 0) {
+            if (left.size == 0 && right.size == 0) {
+                null
+            }
+            else if (left.size == 0) {
                 true
             } else if (right.size == 0) {
                 false
