@@ -1,0 +1,5 @@
+- Had a bug in the logic to replace 'S' and 'E' with the actual elevation.
+- Realized a while later that this needs BFS
+- Got some help/hints from reddit posts
+- Overall, not a fun experience but learned/refredhed the algorithm implementation
+- Noticed that most explanations of these algos online are bad.
