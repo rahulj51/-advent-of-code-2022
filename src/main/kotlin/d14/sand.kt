@@ -1,7 +1,6 @@
 package d14
 
 import common.readInputFile
-import kotlin.math.sign
 
 data class Point (
     val x : Int,
@@ -32,16 +31,20 @@ data class Point (
     }
 }
 
-data class Cave(
-    val rocks: List<Point>
+data class Cave2(
+    var occupied: MutableSet<Point>
 ) {
-    val sandSource = Point(500,1)
-    var occupied = mutableListOf<Point>().apply { addAll(rocks) }
+    val sandSource = Point(500,0)
+    val minX = occupied.minBy { it.x }.x
+    val maxX = occupied.maxBy { it.x }.x
+    val maxY = occupied.maxBy { it.y }.y
 
     fun outOfBounds(p: Point): Boolean {
-        val minX = rocks.first().x
-        val maxX = rocks.last().x
-        return (p.x < minX || p.x > maxX)
+        return (p.x < minX || p.x > maxX || p.y > maxY)
+    }
+
+    fun outOfBoundsP2(p: Point): Boolean {
+        return (p.y == maxY + 2)
     }
 
     fun dropSand(from: Point = sandSource): Point? {
@@ -59,6 +62,7 @@ data class Cave(
         }
     }
 
+    //non recursive
     fun dropSand2(from: Point = sandSource): Point? {
 
         var curr = from
@@ -78,15 +82,15 @@ data class Cave(
 
 
     companion object {
-        fun of(lines: List<String>): Cave {
+        fun of(lines: List<String>): Cave2 {
             val points = lines.flatMap{ l ->
                 l.split("->")
                     .map { p -> Point.of(p) }
                     .windowed(2).flatMap { s -> s.first().to(s.last()) }
 
-            }.toSet().sortedBy { it.x }
+            }.toMutableSet()
 
-            return Cave(points)
+            return Cave2(points)
 
         }
 
@@ -95,15 +99,13 @@ data class Cave(
 
 fun main() {
     val lines = readInputFile("src/main/kotlin/d14/input.dat")
-    val cave = Cave.of(lines)
-    println(cave)
+    val cave = Cave2.of(lines)
 
-    var sandPos = cave.dropSand2()
+    var sandPos = cave.dropSand()
     var sandUnit = 1
     while (sandPos != null) {
-        sandPos = cave.dropSand2()
+        sandPos = cave.dropSand()
         sandUnit += 1
-        println(sandUnit)
     }
 
     println(sandUnit - 1)
