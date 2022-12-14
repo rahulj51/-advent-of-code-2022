@@ -3,9 +3,12 @@ package d13
 import common.readInputFileAsString
 
 fun main() {
-    val input = readInputFileAsString("src/main/kotlin/d13/input.dat")
-    solve1(input)
-    solve2(input)
+//    val input = readInputFileAsString("src/main/kotlin/d13/input.dat")
+//    solve1(input)
+//    solve2(input)
+
+    val s = "[5,[6,[7,8]],10]".toMutableList()
+    println(s)
 
 
 }
