@@ -44,15 +44,20 @@ data class Cave2(
     }
 
     fun outOfBoundsP2(p: Point): Boolean {
-        return (p.y == maxY + 2)
+        return (p.y + 1 == maxY + 2)
+    }
+
+    fun uptoTop(): Boolean {
+        val xxx = listOf<Point>(sandSource, sandSource.leftDown(), sandSource.rightDown(), sandSource.down())
+        return occupied.containsAll(xxx)
     }
 
     fun dropSand(from: Point = sandSource): Point? {
 
-        if (outOfBounds(from)) return null
+        if (uptoTop()) return null
 
         val possibles = listOf<Point>(from.down(), from.leftDown(), from.rightDown())
-        if (occupied.containsAll(possibles)) {
+        if (occupied.containsAll(possibles) || outOfBoundsP2(from)) {
             //can't go any further
             occupied.add(from)
             return from
@@ -103,6 +108,7 @@ fun main() {
 
     var sandPos = cave.dropSand()
     var sandUnit = 1
+
     while (sandPos != null) {
         sandPos = cave.dropSand()
         sandUnit += 1
@@ -111,13 +117,5 @@ fun main() {
     println(sandUnit - 1)
 
 
-//    val x = "498,4 -> 498,6 -> 496,6"
-//    val z = x.split("->").map { p -> Point.of(p) }.windowed(2)
-//    println (z)
-//    println(z.flatMap { s -> s.first().to(s.last()) })
-
-//    val start = Point(10,18)
-//    val end = Point (10,18)
-//    start.to(end)
 }
 
